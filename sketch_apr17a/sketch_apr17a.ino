@@ -1,10 +1,3 @@
-/*
-  Title 		: Arduino UNO Ping Pong Game v2.0
-  Programmed by	: Sabari Kannan M
-  Place			: Coimbatore, Tamil Nadu, India.
-  Created on	: 22 March 2019
-  Last edit 	: 25 March 2019
-*/
 
 // include the LiquidCrystal library
 #include <LiquidCrystal.h>
@@ -97,7 +90,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Developed by:");
   lcd.setCursor(0, 1);
-  lcd.print("SABARI KANNAN M.");
+  lcd.print("Ailin and Havi");
   delay(3000);
 }
 /*----------------------------------------end of setup function--------------------------------*/
@@ -244,4 +237,255 @@ void loop() {
         v2 = paddle1[b];
       }
     }
+
+    // if ball hits paddle1, change direction of ball to R (right)
+    if (v1 == v2) {
+      direction = 'R';
+      score1 += 1;
+      piezoSound(10);
+    }
+
+    // else display the winner
+    else {
+      lcd.clear();
+      lcd.setCursor(3, 0);
+      lcd.print("Game over");
+      lcd.setCursor(4, 1);
+      lcd.print("P2 won!");
+
+      // green LED glows for winner and red for looser with piezo electric crystal sound
+      for (int i = 0; i < 3; i++) {
+        strip1.setPixelColor(0, 255, 0, 0);
+        strip1.show();
+        strip2.setPixelColor(0, 0, 255, 0);
+        strip2.show();
+        piezoSound(500);
+        delay(500);
+        strip1.setPixelColor(0, 0, 0, 0);
+        strip1.show();
+        strip2.setPixelColor(0, 0, 0, 0);
+        strip2.show();
+        delay(500);
+      }
+
+      // set scores to 0 and restart the game
+      score1 = score2 = 0;
+      delay(1000);
+      game = 0;
+    }
+  }
+
+  // checks whether the ball hits the paddle2
+  if (x == 15) {
+    for (int b = 0; b < 16; b++) {
+      if (ball[b] != 0) {
+        v1 = ball[b];
+        v3 = paddle2[b];
+      }
+    }
+
+    // if ball hits paddle2, change direction of ball to L (left)
+    if (v1 == v3) {
+      direction = 'L';
+      score2 += 1;
+      piezoSound(10);
+    }
+
+    // else display the winner
+    else {
+      lcd.clear();
+      lcd.setCursor(3, 0);
+      lcd.print("Game over");
+      lcd.setCursor(4, 1);
+      lcd.print("P1 won!");
+
+      // green LED glows for winner and red for looser with piezo electric crystal sound
+      for (int i = 0; i < 3; i++) {
+        strip1.setPixelColor(0, 0, 255, 0);
+        strip1.show();
+        strip2.setPixelColor(0, 255, 0, 0);
+        strip2.show();
+        piezoSound(500);
+        delay(500);
+        strip1.setPixelColor(0, 0, 0, 0);
+        strip1.show();
+        strip2.setPixelColor(0, 0, 0, 0);
+        strip2.show();
+        delay(500);
+      }
+
+      // set scores to 0 and restart the game
+      score1 = score2 = 0;
+      delay(1000);
+      game = 0;
+    }
+  }
+
+  // if direction is L (left), move ball to left
+  if (direction == 'L') {
+    for (int b = 0; b < 16; b++)
+      if (ball[b] == 16) x -= 1;
+
+    if (bounce == 0)
+      ballLeftDown();
+    else
+      ballLeftUp();
+  }
+
+  // if direction is R (right), move ball to right
+  if (direction == 'R') {
+    for (int b = 0; b < 16; b++)
+      if (ball[b] == 1) x += 1;
+
+    if (bounce == 0)
+      ballRightDown();
+    else
+      ballRightUp();
+  }
+}
+
+/*----------------------------------------end of loop function--------------------------------*/
+
+/*-------------------------------------------other functions----------------------------------*/
+
+//paddle1Up function
+void paddle1Up() {
+  if (paddle1[0] != 1) {
+    int temp = paddle1[0], i;
+    for (i = 0; i < 16; i++)
+      paddle1[i] = paddle1[i + 1];
+    paddle1[i] = temp;
+  }
+}
+
+//paddle1Down function
+void paddle1Down() {
+  if (paddle1[15] != 1) {
+    int temp = paddle1[15], i;
+    for (i = 15; i > 0; i--)
+      paddle1[i] = paddle1[i - 1];
+    paddle1[i] = temp;
+  }
+}
+
+//paddle2Up function
+void paddle2Up() {
+  if (paddle2[0] != 16) {
+    int temp = paddle2[0], i;
+    for (i = 0; i < 16; i++)
+      paddle2[i] = paddle2[i + 1];
+    paddle2[i] = temp;
+  }
+}
+
+//paddle2Down function
+void paddle2Down() {
+  if (paddle2[15] != 16) {
+    int temp = paddle2[15], i;
+    for (i = 15; i > 0; i--)
+      paddle2[i] = paddle2[i - 1];
+    paddle2[i] = temp;
+  }
+}
+
+//ballLeftDown function
+void ballLeftDown() {
+
+  if (ball[15] == 0) {
+    int temp = ball[15], i;
+    for (i = 15; i > 0; i--)
+      ball[i] = ball[i - 1];
+    ball[i] = temp;
+    ballLeft();
+  }
+  else {
+    bounce = 1;
+    piezoSound(10);
+  }
+}
+
+//ballLeftUp function
+void ballLeftUp() {
+
+  if (ball[0] == 0) {
+    int temp = ball[0], i;
+    for (i = 0; i < 15; i++)
+      ball[i] = ball[i + 1];
+    ball[i] = temp;
+    ballLeft();
+  }
+  else {
+    bounce = 0;
+    piezoSound(10);
+  }
+}
+
+//ballRightDown function
+void ballRightDown() {
+
+  if (ball[15] == 0) {
+    int temp = ball[15], i;
+    for (i = 15; i > 0; i--)
+      ball[i] = ball[i - 1];
+    ball[i] = temp;
+    ballRight();
+  }
+  else {
+    bounce = 1;
+    piezoSound(10);
+  }
+}
+
+//ballRightUp function
+void ballRightUp() {
+
+  if (ball[0] == 0) {
+    int temp = ball[0], i;
+    for (i = 0; i < 15; i++)
+      ball[i] = ball[i + 1];
+    ball[i] = temp;
+    ballRight();
+  }
+  else {
+    bounce = 0;
+    piezoSound(10);
+  }
+}
+
+// ballRight function
+void ballRight() {
+  for (int b = 0; b < 16; b++) {
+    if (ball[b] != 0) {
+      if (ball[b] == 16)ball[b] = 8;
+      else if (ball[b] == 8) ball[b] = 4;
+      else if (ball[b] == 4) ball[b] = 2;
+      else if (ball[b] == 2) ball[b] = 1;
+      else if (ball[b] == 1) ball[b] = 16;
+    }
+  }
+}
+
+// ballLeft function
+void ballLeft() {
+  for (int b = 0; b < 16; b++) {
+    if (ball[b] != 0) {
+      if (ball[b] == 1)ball[b] = 2;
+      else if (ball[b] == 2) ball[b] = 4;
+      else if (ball[b] == 4) ball[b] = 8;
+      else if (ball[b] == 8)ball[b] = 16;
+      else if (ball[b] == 16)ball[b] = 1;
+    }
+  }
+}
+
+//piezoSound function
+void piezoSound(int d) {
+  analogWrite(piezo, 20);
+  delay(d);
+  analogWrite(piezo, 0);
+}
+
+/*-------------------------------------------end of other functions----------------------------------*/
+
+/*-----------------------------------------------end of program-------------------------------------*/
 
